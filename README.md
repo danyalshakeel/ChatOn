@@ -44,14 +44,21 @@ A sleek and user-friendly chat app built with Flutter and Firebase. ChatOn offer
 
 
 ## 🎬 Demo
-
 <p align="center">
-  <img src="assets/screenshots/splash.jpg" alt="Login Screen" width="200" />
-  <img src="assets/screenshots/Login.jpg" alt="Login Screen" width="200" />
-  <img src="assets/screenshots/SignUp.jpg" alt="Login Screen" width="200" />
-  <img src="assets/screenshots/Home.jpg" alt="Chat List" width="200" />
-  <img src="assets/screenshots/chatScreen.jpg" alt="Chat Screen" width="200" />
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/splash.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Login.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/SignUp.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Home.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/ChatScreen.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Searchcard.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Profile.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Animated.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/NextUserDetail.jpg" width="200">
+  <img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Edit.jpg" width="200">
 </p>
+
+
+
 
 
 
