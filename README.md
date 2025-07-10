@@ -44,6 +44,7 @@ A sleek and user-friendly chat app built with Flutter and Firebase. ChatOn offer
 
 
 ## 🎬 Demo
+<img src="https://raw.githubusercontent.com/danyalshakeel/ChatOn/master/assets/Login.jpg" width="300">
 
 <img src="https://github.com/user-attachments/assets/131d3af6-2484-473d-9351-4cad77ee18dd/1000222320" width="300">
 <br>
