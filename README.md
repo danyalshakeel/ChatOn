@@ -45,13 +45,20 @@ A sleek and user-friendly chat app built with Flutter and Firebase. ChatOn offer
 
 ## 🎬 Demo
 
-![1000222320](https://github.com/user-attachments/assets/131d3af6-2484-473d-9351-4cad77ee18dd)
-![1000222321](https://github.com/user-attachments/assets/718e4739-70c7-4b82-8c30-d77983892f9b)
-![1000222310](https://github.com/user-attachments/assets/f3a62244-a120-4d17-9b4c-326e6bd3202a)
-![1000222311](https://github.com/user-attachments/assets/5a5db4d6-3e58-45bb-95b0-0b49dafb9d7f)
-![1000222313](https://github.com/user-attachments/assets/ff9329fe-dc53-44af-a8b4-2ee45aedc686)
-![1000222312](https://github.com/user-attachments/assets/92fc087b-71b8-4989-92d4-52bb792d43fb)
-![1000222317](https://github.com/user-attachments/assets/c069486d-bdbb-4b85-8987-3ee817611e22)
+<img src="https://github.com/user-attachments/assets/131d3af6-2484-473d-9351-4cad77ee18dd/1000222320" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/718e4739-70c7-4b82-8c30-d77983892f9b/1000222321" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/f3a62244-a120-4d17-9b4c-326e6bd3202a/1000222310" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/5a5db4d6-3e58-45bb-95b0-0b49dafb9d7f/1000222311" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/ff9329fe-dc53-44af-a8b4-2ee45aedc686/1000222313" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/92fc087b-71b8-4989-92d4-52bb792d43fb/1000222312" width="300">
+<br>
+<img src="https://github.com/user-attachments/assets/c069486d-bdbb-4b85-8987-3ee817611e22/1000222317" width="300">
+
 
 
 
