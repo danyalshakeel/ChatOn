@@ -1,0 +1,595 @@
+// import 'package:chaton/Model/message_model.dart';
+// import 'package:chaton/Screen/chat/message_bubble.dart';
+// import 'package:chaton/Services/auth_services.dart';
+// import 'package:chaton/Services/message_services.dart';
+// import 'package:chaton/Services/user_services.dart';
+// import 'package:chaton/Widget/reuseable.dart';
+// import 'package:chaton/helper.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:uuid/uuid.dart';
+
+// class ChatScreen extends StatefulWidget {
+//   const ChatScreen({
+//     Key? key,
+//     required this.chatId,
+//     required this.currentId,
+//     required this.peerId,
+//     required this.peerName,
+//     this.peerProfileUrl,
+//   }) : super(key: key);
+
+//   final String chatId;
+//   final String currentId;
+//   final String peerId;
+//   final String peerName;
+//   final String? peerProfileUrl;
+
+//   @override
+//   State<ChatScreen> createState() => _ChatScreenState();
+// }
+
+// class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
+//   final Uuid uuid = Uuid();
+//   final TextEditingController _messageController = TextEditingController();
+//   final ScrollController _scrollController = ScrollController();
+//   final FocusNode _messageFocusNode = FocusNode();
+
+//   late AnimationController _sendButtonController;
+//   late Animation<double> _sendButtonAnimation;
+
+//   bool _isTyping = false;
+//   String? _replyToMessage;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _sendButtonController = AnimationController(
+//       duration: const Duration(milliseconds: 200),
+//       vsync: this,
+//     );
+//     _sendButtonAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+//       CurvedAnimation(parent: _sendButtonController, curve: Curves.easeInOut),
+//     );
+
+//     _messageController.addListener(_onMessageChanged);
+
+//     // Mark messages as read when entering chat
+//     // MessageServices().markMessagesAsRead(widget.chatId, widget.currentId);
+//   }
+
+//   @override
+//   void dispose() {
+//     _messageController.removeListener(_onMessageChanged);
+//     _messageController.dispose();
+//     _scrollController.dispose();
+//     _messageFocusNode.dispose();
+//     _sendButtonController.dispose();
+//     super.dispose();
+//   }
+
+//   void _onMessageChanged() {
+//     final hasText = _messageController.text.trim().isNotEmpty;
+//     if (hasText && !_isTyping) {
+//       setState(() => _isTyping = true);
+//       _sendButtonController.forward();
+//     } else if (!hasText && _isTyping) {
+//       setState(() => _isTyping = false);
+//       _sendButtonController.reverse();
+//     }
+//   }
+
+//   Stream<QuerySnapshot> fetchMessages(String chatId) {
+//     return MessageServices().fetchMessages(chatId);
+//   }
+
+//   void _sendMessage() {
+//     final text = _messageController.text.trim();
+//     if (text.isEmpty) return;
+
+//     // Haptic feedback
+//     HapticFeedback.lightImpact();
+
+//     final messageModel = MessageModel(
+//       message: text,
+//       senderId: widget.currentId,
+//       receiverId: widget.peerId,
+//       messageId: uuid.v4(),
+//       timestamp: DateTime.now(),
+//       isRead: false,
+//     );
+
+//     MessageServices().sendMessage(chatId: widget.chatId, message: messageModel);
+//     _messageController.clear();
+//     setState(() => _replyToMessage = null);
+
+//     // Smooth scroll to bottom
+//     Future.delayed(const Duration(milliseconds: 100), () {
+//       if (_scrollController.hasClients) {
+//         _scrollController.animateTo(
+//           0.0,
+//           duration: const Duration(milliseconds: 300),
+//           curve: Curves.easeOut,
+//         );
+//       }
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDarkMode = theme.brightness == Brightness.dark;
+
+//     return Scaffold(
+//       backgroundColor: isDarkMode ? Color(0xFF0D0D0D) : Color(0xFFF5F5F5),
+//       appBar: _buildAppBar(isDarkMode),
+//       body: SafeArea(
+//         child: Column(
+//           children: [
+//             Expanded(
+//               child: Stack(
+//                 children: [_buildMessagesList(), _buildScrollToBottomButton()],
+//               ),
+//             ),
+//             if (_replyToMessage != null) _buildReplyPreview(),
+//             _buildMessageInput(isDarkMode),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   PreferredSizeWidget _buildAppBar(bool isDarkMode) {
+//     return AppBar(
+//       elevation: 0,
+//       backgroundColor: isDarkMode ? Color(0xFF1A1A1A) : Colors.white,
+//       foregroundColor: isDarkMode ? Colors.white : Colors.black,
+//       titleSpacing: 0,
+//       title: InkWell(
+//         onTap: () {
+//           // Navigate to user profile
+//         },
+//         child: Row(
+//           children: [
+//             Hero(
+//               tag: 'avatar_${widget.peerId}',
+//               child: Container(
+//                 width: 40,
+//                 height: 40,
+//                 decoration: BoxDecoration(
+//                   shape: BoxShape.circle,
+//                   gradient: LinearGradient(
+//                     colors: [lightGreenColor, greenColor],
+//                   ),
+//                 ),
+//                 child: CircleAvatar(
+//                   backgroundColor: Colors.transparent,
+//                   backgroundImage: widget.peerProfileUrl != null
+//                       ? NetworkImage(widget.peerProfileUrl!)
+//                       : null,
+//                   child: widget.peerProfileUrl == null
+//                       ? Text(
+//                           widget.peerName[0].toUpperCase(),
+//                           style: TextStyle(
+//                             color: Colors.white,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         )
+//                       : null,
+//                 ),
+//               ),
+//             ),
+//             horizontalGap(12),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     widget.peerName,
+//                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+//                   ),
+//                   StreamBuilder<bool>(
+//                     stream: DatabaseServices().getOnlineStatus(widget.peerId),
+//                     builder: (context, snapshot) {
+//                       final isOnline = snapshot.data ?? false;
+//                       return AnimatedSwitcher(
+//                         duration: Duration(milliseconds: 300),
+//                         child: Text(
+//                           isOnline ? 'Active now' : 'Offline',
+//                           key: ValueKey(isOnline),
+//                           style: TextStyle(
+//                             color: isOnline
+//                                 ? greenColor
+//                                 : (isDarkMode ? Colors.grey[600] : Colors.grey),
+//                             fontSize: 12,
+//                             fontWeight: FontWeight.w400,
+//                           ),
+//                         ),
+//                       );
+//                     },
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//       actions: [
+//         IconButton(icon: Icon(Icons.videocam_rounded), onPressed: () {}),
+//         IconButton(icon: Icon(Icons.call_rounded), onPressed: () {}),
+//         IconButton(icon: Icon(Icons.more_vert_rounded), onPressed: () {}),
+//       ],
+//     );
+//   }
+
+//   Widget _buildMessagesList() {
+//     return StreamBuilder<QuerySnapshot>(
+//       stream: fetchMessages(widget.chatId),
+//       builder: (context, snapshot) {
+//         final docs = snapshot.data?.docs ?? [];
+//         if (docs.isEmpty) {
+//           return Center(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Icon(
+//                   Icons.chat_bubble_outline_rounded,
+//                   size: 64,
+//                   color: Colors.grey[400],
+//                 ),
+//                 verticalGap(16),
+//                 Text(
+//                   'No messages yet',
+//                   style: TextStyle(color: Colors.grey[600], fontSize: 16),
+//                 ),
+//                 verticalGap(8),
+//                 Text(
+//                   'Say hello to ${widget.peerName}!',
+//                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
+//                 ),
+//               ],
+//             ),
+//           );
+//         }
+
+//         return ListView.builder(
+//           reverse: true,
+//           controller: _scrollController,
+//           padding: const EdgeInsets.symmetric(vertical: 16),
+//           itemCount: docs.length,
+//           itemBuilder: (context, index) {
+//             final data = docs[index].data() as Map<String, dynamic>;
+//             final message = MessageModel.fromJson(data);
+//             final isMe = message.senderId == widget.currentId;
+
+//             // Check if we should show date separator
+//             bool showDateSeparator = false;
+//             if (index == docs.length - 1) {
+//               showDateSeparator = true;
+//             } else {
+//               final nextData = docs[index + 1].data() as Map<String, dynamic>;
+//               final nextMessage = MessageModel.fromJson(nextData);
+//               showDateSeparator = !_isSameDay(
+//                 message.timestamp,
+//                 nextMessage.timestamp,
+//               );
+//             }
+
+//             return Column(
+//               children: [
+//                 if (showDateSeparator) _buildDateSeparator(message.timestamp),
+//                 Dismissible(
+//                   key: Key(message.messageId),
+//                   direction: isMe
+//                       ? DismissDirection.endToStart
+//                       : DismissDirection.startToEnd,
+//                   background: Container(
+//                     alignment: isMe
+//                         ? Alignment.centerRight
+//                         : Alignment.centerLeft,
+//                     padding: EdgeInsets.symmetric(horizontal: 20),
+//                     child: Icon(Icons.reply_rounded, color: greenColor),
+//                   ),
+//                   confirmDismiss: (direction) async {
+//                     setState(() => _replyToMessage = message.message);
+//                     _messageFocusNode.requestFocus();
+//                     return false;
+//                   },
+//                   child: MessageBubble(
+//                     message: message.message,
+//                     timestamp: formatTime(message.timestamp),
+//                     isMe: isMe,
+//                   ),
+//                 ),
+//               ],
+//             );
+//           },
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildDateSeparator(DateTime date) {
+//     final dateStr = _getDateString(date);
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 16),
+//       child: Row(
+//         children: [
+//           Expanded(child: Divider()),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 16),
+//             child: Text(
+//               dateStr,
+//               style: TextStyle(
+//                 color: Colors.grey[600],
+//                 fontSize: 12,
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//           ),
+//           Expanded(child: Divider()),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildScrollToBottomButton() {
+//     return Positioned(
+//       bottom: 16,
+//       right: 16,
+//       child: AnimatedBuilder(
+//         animation: _scrollController,
+//         builder: (context, child) {
+//           final showButton =
+//               _scrollController.hasClients && _scrollController.offset > 200;
+
+//           return AnimatedOpacity(
+//             opacity: showButton ? 1.0 : 0.0,
+//             duration: Duration(milliseconds: 200),
+//             child: AnimatedScale(
+//               scale: showButton ? 1.0 : 0.0,
+//               duration: Duration(milliseconds: 200),
+//               child: FloatingActionButton.small(
+//                 onPressed: () {
+//                   _scrollController.animateTo(
+//                     0.0,
+//                     duration: Duration(milliseconds: 300),
+//                     curve: Curves.easeOut,
+//                   );
+//                 },
+//                 backgroundColor: greenColor,
+//                 child: Icon(Icons.arrow_downward_rounded),
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   Widget _buildReplyPreview() {
+//     return Container(
+//       padding: EdgeInsets.all(8),
+//       decoration: BoxDecoration(
+//         color: Colors.grey[200],
+//         border: Border(top: BorderSide(color: Colors.grey[300]!)),
+//       ),
+//       child: Row(
+//         children: [
+//           Container(width: 4, height: 40, color: greenColor),
+//           horizontalGap(8),
+//           Expanded(
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   'Reply to',
+//                   style: TextStyle(
+//                     fontSize: 12,
+//                     color: greenColor,
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                 ),
+//                 Text(
+//                   _replyToMessage!,
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                   style: TextStyle(fontSize: 14),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           IconButton(
+//             icon: Icon(Icons.close, size: 20),
+//             onPressed: () => setState(() => _replyToMessage = null),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildMessageInput(bool isDarkMode) {
+//     return Container(
+//       padding: EdgeInsets.all(8),
+//       decoration: BoxDecoration(
+//         color: isDarkMode ? Color(0xFF1A1A1A) : Colors.white,
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.05),
+//             blurRadius: 10,
+//             offset: Offset(0, -2),
+//           ),
+//         ],
+//       ),
+//       child: Row(
+//         children: [
+//           IconButton(
+//             icon: Icon(Icons.add_circle_outline_rounded),
+//             color: greenColor,
+//             onPressed: () {
+//               // Show attachment options
+//             },
+//           ),
+//           Expanded(
+//             child: Container(
+//               decoration: BoxDecoration(
+//                 color: isDarkMode ? Color(0xFF2A2A2A) : Colors.grey[100],
+//                 borderRadius: BorderRadius.circular(24),
+//               ),
+//               child: Row(
+//                 children: [
+//                   Expanded(
+//                     child: TextField(
+//                       controller: _messageController,
+//                       focusNode: _messageFocusNode,
+//                       maxLines: 5,
+//                       minLines: 1,
+//                       decoration: InputDecoration(
+//                         hintText: 'Type a message...',
+//                         hintStyle: TextStyle(color: Colors.grey[600]),
+//                         border: InputBorder.none,
+//                         contentPadding: EdgeInsets.symmetric(
+//                           horizontal: 16,
+//                           vertical: 10,
+//                         ),
+//                       ),
+//                       textInputAction: TextInputAction.send,
+//                       onSubmitted: (_) => _sendMessage(),
+//                     ),
+//                   ),
+//                   IconButton(
+//                     icon: Icon(Icons.emoji_emotions_outlined),
+//                     color: Colors.grey[600],
+//                     onPressed: () {
+//                       // Show emoji picker
+//                     },
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//           horizontalGap(8),
+//           AnimatedBuilder(
+//             animation: _sendButtonAnimation,
+//             builder: (context, child) {
+//               return Transform.scale(
+//                 scale: 0.8 + (_sendButtonAnimation.value * 0.2),
+//                 child: Container(
+//                   width: 48,
+//                   height: 48,
+//                   decoration: BoxDecoration(
+//                     shape: BoxShape.circle,
+//                     gradient: LinearGradient(
+//                       colors: _isTyping
+//                           ? [lightGreenColor, greenColor]
+//                           : [Colors.grey[400]!, Colors.grey[500]!],
+//                       begin: Alignment.topLeft,
+//                       end: Alignment.bottomRight,
+//                     ),
+//                     boxShadow: _isTyping
+//                         ? [
+//                             BoxShadow(
+//                               color: greenColor.withOpacity(0.3),
+//                               blurRadius: 8,
+//                               offset: Offset(0, 2),
+//                             ),
+//                           ]
+//                         : [],
+//                   ),
+//                   child: IconButton(
+//                     icon: AnimatedSwitcher(
+//                       duration: Duration(milliseconds: 200),
+//                       transitionBuilder: (child, animation) {
+//                         return RotationTransition(
+//                           turns: animation,
+//                           child: child,
+//                         );
+//                       },
+//                       child: Icon(
+//                         _isTyping ? Icons.send_rounded : Icons.mic_rounded,
+//                         key: ValueKey(_isTyping),
+//                         color: Colors.white,
+//                       ),
+//                     ),
+//                     onPressed: _isTyping
+//                         ? _sendMessage
+//                         : () {
+//                             // Start voice recording
+//                           },
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   // bool _shouldShowAvatar(List<QueryDocumentSnapshot> docs, int index) {
+//   //   if (index == 0) return true;
+
+//   //   final currentMessage = MessageModel.fromJson(
+//   //     docs[index].data() as Map<String, dynamic>,
+//   //   );
+//   //   final previousMessage = MessageModel.fromJson(
+//   //     docs[index - 1].data() as Map<String, dynamic>,
+//   //   );
+
+//   //   // Show avatar if sender changed or messages are far apart
+//   //   return currentMessage.senderId != previousMessage.senderId ||
+//   //       currentMessage.timestamp
+//   //               .difference(previousMessage.timestamp)
+//   //               .inMinutes >
+//   //           5;
+//   // }
+
+//   bool _isSameDay(DateTime date1, DateTime date2) {
+//     return date1.year == date2.year &&
+//         date1.month == date2.month &&
+//         date1.day == date2.day;
+//   }
+
+//   String _getDateString(DateTime date) {
+//     final now = DateTime.now();
+//     final today = DateTime(now.year, now.month, now.day);
+//     final yesterday = today.subtract(Duration(days: 1));
+//     final dateToCheck = DateTime(date.year, date.month, date.day);
+
+//     if (dateToCheck == today) {
+//       return 'Today';
+//     } else if (dateToCheck == yesterday) {
+//       return 'Yesterday';
+//     } else if (now.difference(date).inDays < 7) {
+//       return _getWeekdayName(date.weekday);
+//     } else {
+//       return '${date.day}/${date.month}/${date.year}';
+//     }
+//   }
+
+//   String _getWeekdayName(int weekday) {
+//     const weekdays = [
+//       'Monday',
+//       'Tuesday',
+//       'Wednesday',
+//       'Thursday',
+//       'Friday',
+//       'Saturday',
+//       'Sunday',
+//     ];
+//     return weekdays[weekday - 1];
+//   }
+// }
+
+// // Add this extension for smooth scrolling
+// extension ScrollControllerExtension on ScrollController {
+//   Future<void> scrollToBottom({
+//     Duration duration = const Duration(milliseconds: 300),
+//     Curve curve = Curves.easeOut,
+//   }) async {
+//     if (hasClients) {
+//       await animateTo(0.0, duration: duration, curve: curve);
+//     }
+//   }
+// }

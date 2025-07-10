@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "488617010504",
+    "project_id": "quickchat-d9444",
+    "storage_bucket": "quickchat-d9444.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488617010504:android:d3590beff4cdd8e05a7f7d",
+        "android_client_info": {
+          "package_name": "com.example.chaton"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxWUKnVzAidQy0Q1DKveiEKtPlSIW1i9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
